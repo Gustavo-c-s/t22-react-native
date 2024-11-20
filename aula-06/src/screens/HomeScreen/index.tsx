@@ -7,14 +7,36 @@ import {
   Button,
   TouchableOpacity,
 } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { tarefa } from "../../types/types";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import axios from "axios";
 
 export const HomeScreen = () => {
   const [tarefa, setTarefa] = useState("");
   const [listaTarefas, setListaTarefas] = useState<any[]>([]);
-
+  const URL = "https://673bc1f496b8dcd5f3f75c59.mockapi.io/tarefas";
+  const getTarefas= async()=>{
+    try{
+      const{data} =await axios.get(URL);
+      setListaTarefas(data)
+    }catch(erro){
+      console.log(erro,'get')
+    }
+  }
+  useEffect(()=>{
+    getTarefas();
+  },[])
+  const deleteTarefa= async(id:number)=>{
+    try{
+      const{data} = await axios.delete(URL+'/'+id)
+      console.log("deleta tafera. id:",id);
+      const listaDeleta = listaTarefas.filter((item)=>item.id !== data.id)
+      setListaTarefas(listaDeleta)
+    }catch(erro){
+      console.log('erro delete',erro)
+    }
+  }
   const adicionarTarefa = () => {
     if (tarefa == "") return;
     // const novaTarefa = {
@@ -24,7 +46,7 @@ export const HomeScreen = () => {
     //   status: false
     // }
     const novaTarefa = {
-      titulo: tarefa,
+      name: tarefa,
     };
 
     setListaTarefas([...listaTarefas, novaTarefa]);
@@ -32,10 +54,10 @@ export const HomeScreen = () => {
     setTarefa("");
   };
 
-  const deletarTarefa = (itemIndex: number) => {
-    console.log("Deletar Tarefa. Index: ", itemIndex);
+  const deletarTarefa = (id: number) => {
+    console.log("Deletar Tarefa. Id: ", id);
     const listaFiltrada = listaTarefas.filter(
-      (item, index) => index !== itemIndex
+      (item) =>item.id !== id
     );
     setListaTarefas(listaFiltrada);
   };
@@ -62,13 +84,13 @@ export const HomeScreen = () => {
         renderItem={({ item, index }) => (
           <View style={styles.itemContainer}>
             <Text style={styles.itemText} numberOfLines={1}>
-              {item.titulo}
+              {item.name}
             </Text>
             <View style={styles.iconContainer}>
               <TouchableOpacity>
                 <FontAwesome name="pencil" size={24} color="white" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => deletarTarefa(index)}>
+              <TouchableOpacity onPress={() => deletarTarefa(item.id)}>
                 <FontAwesome name="trash-o" size={24} color="white" />
               </TouchableOpacity>
             </View>

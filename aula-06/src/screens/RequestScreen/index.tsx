@@ -1,18 +1,39 @@
 import axios from "axios";
-import { View, Text, Button } from "react-native";
+import { useEffect, useState } from "react";
+import { View, Text, Button, FlatList,  } from "react-native";
 
-const URL = "https://673bbe8096b8dcd5f3f74e9b.mockapi.io/api/tarefas";
+const URL = "https://673bc1f496b8dcd5f3f75c59.mockapi.io/tarefas";
 
 export default function RequestScreen() {
-  const obterDados = async () => {
-    const { data } = await axios.get(URL);
-    console.log("DADOS: ", data);
-  };
+  const [tarefa,setTarefa] = useState<any>([]);
+ 
+  useEffect(()=>{
+    const obterDados = async () => {
+      try{
+        
+        const { data } = await axios.get(URL);
+        console.log("DADOS: ", data);
+        setTarefa(data)
+      }catch(error){
+        console.log("error no get.", error)
+      }
+    };
+    obterDados();
+
+  },[])
 
   return (
     <View>
       <Text>RequestScreen</Text>
-      <Button title="Obter Dados" onPress={obterDados} />
+      <FlatList
+      data={tarefa}
+      keyExtractor={item=>item.id}
+      renderItem={({item})=>(
+        <Text>{item.name}</Text>
+      )}
+      />
+
+      {/* <Button title="Obter Dados" onPress={obterDados} /> */}
     </View>
   );
 }
