@@ -22,6 +22,23 @@ export default function RequestScreen() {
 
   },[])
 
+  useEffect(() => {
+    obterDados();
+  }, []);
+
+  //   useEffect(() => {
+  //     const obterDados = async () => {
+  //       try {
+  //         const { data } = await axios.get(URL);
+  //         setListaTarefas(data);
+  //         console.log("DADOS: ", data);
+  //       } catch (err) {
+  //         console.log("Erro ao carregar Tarefas. ", err);
+  //       }
+  //     };
+  //     obterDados();
+  //   }, []);
+
   return (
     <View>
       <Text>RequestScreen</Text>

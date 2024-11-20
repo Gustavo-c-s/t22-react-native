@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Button,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { useEffect, useState } from "react";
 import { tarefa } from "../../types/types";
@@ -39,18 +40,48 @@ export const HomeScreen = () => {
   }
   const adicionarTarefa = () => {
     if (tarefa == "") return;
-    // const novaTarefa = {
-    //   id: "",
-    //   titulo: "",
-    //   descricao: "",
-    //   status: false
-    // }
+
     const novaTarefa = {
       name: tarefa,
     };
 
-    setListaTarefas([...listaTarefas, novaTarefa]);
+    try {
+      const novaTarefaAPi = await createTarefa(novaTarefa);
+      console.log("POST: ", novaTarefaAPi);
+      setListaTarefas([...listaTarefas, novaTarefaAPi]);
+      setTarefa("");
+    } catch (err) {
+      console.log("Erro ao carregar Tarefas. ", err);
+    }
+  };
 
+  const deletarTarefa = async (id: number) => {
+    try {
+      const tarefaDeletadaApi = await deleteTarefa(id);
+      console.log("Tarefa Deletada: ", tarefaDeletadaApi);
+      const listaFiltrada = listaTarefas.filter(
+        (item) => item.id !== tarefaDeletadaApi.id
+      );
+      setListaTarefas(listaFiltrada);
+    } catch (err) {
+      console.log("Erro ao deletar tarefa.", err);
+    }
+  };
+
+  const editarTarefa = (itemTarefa: tarefa) => {
+    setEstaEditando({
+      item: itemTarefa,
+      editando: true,
+    });
+    console.log("EDITAR TAREFA ", itemTarefa.id);
+    setTarefa(itemTarefa.titulo);
+  };
+
+  const cancelar = () => {
+    setEstaEditando({
+      item: undefined,
+      editando: false,
+    });
     setTarefa("");
   };
 
@@ -62,9 +93,9 @@ export const HomeScreen = () => {
     setListaTarefas(listaFiltrada);
   };
 
-  //Texto para um lado e ícone para o outro
-  //Criem uma função para excluir um item do array
-  //Utilizem o filter no listaTarefas
+  useEffect(() => {
+    buscarTarefas();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -75,7 +106,14 @@ export const HomeScreen = () => {
           value={tarefa}
           onChangeText={setTarefa}
         />
-        <Button title="Adicionar Tarefa" onPress={adicionarTarefa} />
+        {estaEditando.editando ? (
+          <View style={{ gap: 5 }}>
+            <Button title="cancelar" onPress={cancelar} />
+            <Button title="SALVAR" onPress={salvar} />
+          </View>
+        ) : (
+          <Button title="Adicionar Tarefa" onPress={adicionarTarefa} />
+        )}
       </View>
       {/* Exibição das tarefas */}
       <FlatList
@@ -94,10 +132,10 @@ export const HomeScreen = () => {
                 <FontAwesome name="trash-o" size={24} color="white" />
               </TouchableOpacity>
             </View>
-          </View>
-        )}
-        keyExtractor={(item, index) => index.toString()}
-      />
+          )}
+          keyExtractor={(item, index) => index.toString()}
+        />
+      )}
     </View>
   );
 };
